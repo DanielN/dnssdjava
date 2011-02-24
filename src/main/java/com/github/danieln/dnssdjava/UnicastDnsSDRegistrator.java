@@ -126,7 +126,27 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
 	}
 	
 	@Override
-	public void unregisterService(ServiceName serviceName) {
-		
+	public boolean unregisterService(ServiceName serviceName) throws DnsSDException {
+		try {
+			Name dnsName = serviceName.toDnsName();
+			Name typeName = new Name(serviceName.getType().toString(), registrationDomain);
+			Update update = new Update(registrationDomain);		// XXX Should really be the zone (SOA) for the RRs we are about to remove
+			update.present(dnsName);
+			update.delete(new PTRRecord(typeName, DClass.IN, 60, dnsName));
+			update.delete(dnsName);
+			Message response = resolver.send(update);
+			switch (response.getRcode()) {
+				case Rcode.NOERROR:
+					return true;
+				case Rcode.NXDOMAIN:	// Prerequisite failed, the service doesn't exist.
+					return false;
+				default:
+					throw new DnsSDException("Server returned error code: " + Rcode.string(response.getRcode()));
+			}
+		} catch (TextParseException ex) {
+			throw new IllegalArgumentException("Invalid service name: " + serviceName, ex);
+		} catch (IOException ex) {
+			throw new DnsSDException("Failed to send DNS update to server", ex);
+		}
 	}
 }

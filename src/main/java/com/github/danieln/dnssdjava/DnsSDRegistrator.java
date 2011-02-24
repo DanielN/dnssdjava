@@ -16,6 +16,6 @@ interface DnsSDRegistrator {
 
 	boolean registerService(ServiceData serviceData) throws DnsSDException;
 
-	void unregisterService(ServiceName serviceName);
+	boolean unregisterService(ServiceName serviceName) throws DnsSDException;
 
 }
