@@ -7,7 +7,7 @@ package com.github.danieln.dnssdjava;
 
 
 /**
- * 
+ * Thrown when a DNS-SD operation fails.
  * @author Daniel Nilsson
  */
 public class DnsSDException extends Exception {

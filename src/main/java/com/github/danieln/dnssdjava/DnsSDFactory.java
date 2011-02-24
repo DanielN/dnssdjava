@@ -14,13 +14,18 @@ import org.xbill.DNS.Name;
 import org.xbill.DNS.TextParseException;
 
 /**
- *
+ * Factory class for creating {@link DnsSDBrowser}, {@link DnsSDRegistrator} and
+ * {@link DnsSDDomainEnumerator} objects.
  * @author daniel.nilsson
  */
 public class DnsSDFactory {
 
 	private static DnsSDFactory instance;
 
+	/**
+	 * Get the singleton factory object.
+	 * @return the DnsSDFactory.
+	 */
 	public static synchronized DnsSDFactory getInstance() {
 		if (instance == null) {
 			instance = new DnsSDFactory();
@@ -31,6 +36,12 @@ public class DnsSDFactory {
 	protected DnsSDFactory() {
 	}
 
+	/**
+	 * Create a {@link DnsSDDomainEnumerator} that finds the browsing
+	 * and registration domains for the given computer domain.
+	 * @param computerDomain the domain name.
+	 * @return a new {@link DnsSDDomainEnumerator}.
+	 */
 	public DnsSDDomainEnumerator createDomainEnumerator(String computerDomain) {
 		try {
 			return new UnicastDnsSDDomainEnumerator(Collections.singletonList(Name.fromString(computerDomain)));
@@ -39,18 +50,40 @@ public class DnsSDFactory {
 		}
 	}
 
+	/**
+	 * Create a {@link DnsSDDomainEnumerator} that finds the browsing
+	 * and registration domains for this computer.
+	 * @return a new {@link DnsSDDomainEnumerator}.
+	 */
 	public DnsSDDomainEnumerator createDomainEnumerator() {
 		return new UnicastDnsSDDomainEnumerator(DomainUtil.getComputerDomains());
 	}
 
+	/**
+	 * Create a {@link DnsSDBrowser} that finds services in the default
+	 * browsing domains.
+	 * @return a new {@link DnsSDBrowser}.
+	 */
 	public DnsSDBrowser createBrowser() {
 		return createBrowser(createDomainEnumerator());
 	}
 
+	/**
+	 * Create a {@link DnsSDBrowser} that finds services in the specified
+	 * browsing domain.
+	 * @param browserDomain the name of the domain to browse.
+	 * @return a new {@link DnsSDBrowser}.
+	 */
 	public DnsSDBrowser createBrowser(String browserDomain) {
 		return createBrowser(Collections.singletonList(browserDomain));
 	}
 
+	/**
+	 * Create a {@link DnsSDBrowser} that finds services in the specified
+	 * browsing domains.
+	 * @param browserDomains collection of domain names to browse.
+	 * @return a new {@link DnsSDBrowser}.
+	 */
 	public DnsSDBrowser createBrowser(Collection<String> browserDomains) {
 		List<Name> domains = new ArrayList<Name>(browserDomains.size());
 		for (String domain : browserDomains) {
@@ -63,6 +96,12 @@ public class DnsSDFactory {
 		return new UnicastDnsSDBrowser(domains);
 	}
 
+	/**
+	 * Create a {@link DnsSDBrowser} that finds services in the
+	 * browsing domains found by the specified {@link DnsSDDomainEnumerator}.
+	 * @param domainEnumerator the domain enumerator to query for browser domains.
+	 * @return a new {@link DnsSDBrowser}.
+	 */
 	public DnsSDBrowser createBrowser(DnsSDDomainEnumerator domainEnumerator) {
 		Collection<String> list = domainEnumerator.getBrowsingDomains();
 		if (list.isEmpty()) {
@@ -76,10 +115,23 @@ public class DnsSDFactory {
 		return createBrowser(list);
 	}
 
+	/**
+	 * Create a {@link DnsSDRegistrator} that registers services in the
+	 * default registration domain.
+	 * @return a new {@link DnsSDRegistrator}.
+	 * @throws DnsSDException if the registrator can't be created.
+	 */
 	public DnsSDRegistrator createRegistrator() throws DnsSDException {
 		return createRegistrator(createDomainEnumerator());
 	}
 
+	/**
+	 * Create a {@link DnsSDRegistrator} that registers services in the
+	 * specified registration domain.
+	 * @param registeringDomain the domain name to register services.
+	 * @return a new {@link DnsSDRegistrator}.
+	 * @throws DnsSDException if the registrator can't be created.
+	 */
 	public DnsSDRegistrator createRegistrator(String registeringDomain) throws DnsSDException {
 		try {
 			return new UnicastDnsSDRegistrator(Name.fromString(registeringDomain));
@@ -90,6 +142,13 @@ public class DnsSDFactory {
 		}
 	}
 
+	/**
+	 * Create a {@link DnsSDRegistrator} that registers services in the
+	 * registration domain found by the specified {@link DnsSDDomainEnumerator}.
+	 * @param domainEnumerator the domain enumerator to query for registration domains.
+	 * @return a new {@link DnsSDRegistrator}.
+	 * @throws DnsSDException if the registrator can't be created.
+	 */
 	public DnsSDRegistrator createRegistrator(DnsSDDomainEnumerator domainEnumerator) throws DnsSDException {
 		String registeringDomain = domainEnumerator.getDefaultRegisteringDomain();
 		if (registeringDomain == null) {
