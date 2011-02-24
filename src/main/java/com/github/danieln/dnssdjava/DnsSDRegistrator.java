@@ -5,6 +5,8 @@
  */
 package com.github.danieln.dnssdjava;
 
+import java.net.UnknownHostException;
+
 
 /**
  *
@@ -14,6 +16,8 @@ interface DnsSDRegistrator {
 
 	ServiceName makeServiceName(String name, ServiceType type);
 
+	String getLocalHostName() throws UnknownHostException;
+	
 	boolean registerService(ServiceData serviceData) throws DnsSDException;
 
 	boolean unregisterService(ServiceName serviceName) throws DnsSDException;

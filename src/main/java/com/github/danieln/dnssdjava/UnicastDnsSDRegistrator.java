@@ -85,6 +85,11 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
 	}
 	
 	@Override
+	public String getLocalHostName() throws UnknownHostException {
+		return Address.getHostName(InetAddress.getLocalHost());
+	}
+	
+	@Override
 	public boolean registerService(ServiceData serviceData) throws DnsSDException {
 		try {
 			ServiceName serviceName = serviceData.getName();
