@@ -5,6 +5,7 @@
  */
 package com.github.danieln.dnssdjava;
 
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -75,4 +76,30 @@ public class DnsSDFactory {
 		return createBrowser(list);
 	}
 
+	public DnsSDRegistrator createRegistrator() throws DnsSDException {
+		return createRegistrator(createDomainEnumerator());
+	}
+
+	public DnsSDRegistrator createRegistrator(String registeringDomain) throws DnsSDException {
+		try {
+			return new UnicastDnsSDRegistrator(Name.fromString(registeringDomain));
+		} catch (UnknownHostException ex) {
+			throw new DnsSDException("Failed to find DNS update server for domain: " + registeringDomain, ex);
+		} catch (TextParseException ex) {
+			throw new IllegalArgumentException("Invalid domain name: " + registeringDomain, ex);
+		}
+	}
+
+	public DnsSDRegistrator createRegistrator(DnsSDDomainEnumerator domainEnumerator) throws DnsSDException {
+		String registeringDomain = domainEnumerator.getDefaultRegisteringDomain();
+		if (registeringDomain == null) {
+			Collection<String> domains = domainEnumerator.getRegisteringDomains();
+			if (!domains.isEmpty()) {
+				registeringDomain = domains.iterator().next();
+			} else {
+				throw new DnsSDException("Failed to find any registering domain");
+			}
+		}
+		return createRegistrator(registeringDomain);
+	}
 }
