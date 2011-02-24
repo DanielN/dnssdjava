@@ -42,14 +42,21 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
 	private static final Logger logger = Logger.getLogger(UnicastDnsSDBrowser.class.getName());
 
 	private static final Name DNSUPDATE_UDP = Name.fromConstantString("_dns-update._udp");
+	private static final Name SERVICES_DNSSD_UDP = Name.fromConstantString("_services._dns-sd._udp");
 	
 	private final Name registrationDomain;
 	private final Resolver resolver;
+	private final Name servicesName;
 
 	UnicastDnsSDRegistrator(Name registrationDomain) throws UnknownHostException {
-		this.registrationDomain = registrationDomain;
-		this.resolver = findUpdateResolver(registrationDomain);
-		logger.log(Level.INFO, "Created DNS-SD Registrator for domain {0}", registrationDomain);
+		try {
+			this.registrationDomain = registrationDomain;
+			this.resolver = findUpdateResolver(registrationDomain);
+			this.servicesName = Name.concatenate(SERVICES_DNSSD_UDP, registrationDomain);
+			logger.log(Level.INFO, "Created DNS-SD Registrator for domain {0}", registrationDomain);
+		} catch (NameTooLongException e) {
+			throw new IllegalArgumentException("Domain name too long: " + registrationDomain, e);
+		}
 	}
 
 	private Resolver findUpdateResolver(Name domain) throws UnknownHostException {
@@ -111,6 +118,7 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
 			}
 			Update update = new Update(registrationDomain);		// XXX Should really be the zone (SOA) for the RRs we are about to add
 			update.absent(dnsName);
+			update.add(new PTRRecord(servicesName, DClass.IN, 60, typeName));
 			update.add(new PTRRecord(typeName, DClass.IN, 60, dnsName));
 			update.add(new SRVRecord(dnsName, DClass.IN, 60, 0, 0, serviceData.getPort(), target));
 			update.add(new TXTRecord(dnsName, DClass.IN, 60, strings));
