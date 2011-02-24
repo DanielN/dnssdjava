@@ -22,6 +22,7 @@ import org.xbill.DNS.Message;
 import org.xbill.DNS.Name;
 import org.xbill.DNS.NameTooLongException;
 import org.xbill.DNS.PTRRecord;
+import org.xbill.DNS.Rcode;
 import org.xbill.DNS.Record;
 import org.xbill.DNS.Resolver;
 import org.xbill.DNS.SRVRecord;
@@ -84,7 +85,7 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
 	}
 	
 	@Override
-	public void registerService(ServiceData serviceData) throws IOException {
+	public boolean registerService(ServiceData serviceData) throws DnsSDException {
 		try {
 			ServiceName serviceName = serviceData.getName();
 			Name dnsName = serviceName.toDnsName();
@@ -108,11 +109,19 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
 			update.add(new PTRRecord(typeName, DClass.IN, 60, dnsName));
 			update.add(new SRVRecord(dnsName, DClass.IN, 60, 0, 0, serviceData.getPort(), target));
 			update.add(new TXTRecord(dnsName, DClass.IN, 60, strings));
-			System.out.println("Update: " + update);
 			Message response = resolver.send(update);
-			System.out.println("Result: " + response);
+			switch (response.getRcode()) {
+				case Rcode.NOERROR:
+					return true;
+				case Rcode.YXDOMAIN:	// Prerequisite failed, the service already exists.
+					return false;
+				default:
+					throw new DnsSDException("Server returned error code: " + Rcode.string(response.getRcode()));
+			}
 		} catch (TextParseException ex) {
 			throw new IllegalArgumentException("Invalid service data: " + serviceData, ex);
+		} catch (IOException ex) {
+			throw new DnsSDException("Failed to send DNS update to server", ex);
 		}
 	}
 	

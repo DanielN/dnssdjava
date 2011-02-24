@@ -5,7 +5,6 @@
  */
 package com.github.danieln.dnssdjava;
 
-import java.io.IOException;
 
 /**
  *
@@ -15,7 +14,7 @@ interface DnsSDRegistrator {
 
 	ServiceName makeServiceName(String name, ServiceType type);
 
-	void registerService(ServiceData serviceData) throws IOException;
+	boolean registerService(ServiceData serviceData) throws DnsSDException;
 
 	void unregisterService(ServiceName serviceName);
 
