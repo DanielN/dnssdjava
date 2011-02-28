@@ -60,7 +60,7 @@ class UnicastDnsSDBrowser implements DnsSDBrowser {
 	@Override
 	public ServiceData getServiceData(ServiceName service) {
 		Name serviceName = service.toDnsName();
-		Lookup lookup = new Lookup(serviceName, Type.ANY);
+		Lookup lookup = new Lookup(serviceName, Type.SRV);
 		Record[] records = lookup.run();
 		if (records == null || records.length == 0) {
 			return null;
@@ -73,7 +73,16 @@ class UnicastDnsSDBrowser implements DnsSDBrowser {
 				SRVRecord srv = (SRVRecord) record;
 				data.setHost(srv.getTarget().toString());
 				data.setPort(srv.getPort());
-			} else if (record instanceof TXTRecord) {
+				break;
+			}
+		}
+		lookup = new Lookup(serviceName, Type.TXT);
+		records = lookup.run();
+		if (records == null || records.length == 0) {
+			return data;
+		}
+		for (Record record : records) {
+			if (record instanceof TXTRecord) {
 				// TODO Handle multiple TXT records as different variants of same service
 				TXTRecord txt = (TXTRecord) record;
 				for (Object o : txt.getStrings()) {
@@ -94,6 +103,7 @@ class UnicastDnsSDBrowser implements DnsSDBrowser {
 						data.getProperties().put(key, value);
 					}
 				}
+				break;
 			}
 		}
 		return data;
