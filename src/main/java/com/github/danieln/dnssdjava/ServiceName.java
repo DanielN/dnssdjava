@@ -10,8 +10,16 @@ import java.nio.charset.Charset;
 import org.xbill.DNS.Name;
 
 /**
- *
- * @author daniel.nilsson
+ * A unique identifier for a service instance.
+ * A service name consists of the triple domain, service type and name.
+ * The domain is the fully qualified domain where the service is registered.
+ * The service type specified the protocol to use when accessing the service.
+ * The name identifies this particular instance of the service. Instance names
+ * should be human readable and can contain spaces, punctuation and international
+ * characters.
+ * <p>
+ * Instances of the class are immutable.
+ * @author Daniel Nilsson
  */
 public class ServiceName {
 
@@ -21,20 +29,38 @@ public class ServiceName {
 	private final ServiceType type;
 	private final String domain;
 
+	/**
+	 * Create a new ServiceName.
+	 * @param name the name of the service.
+	 * @param type the type of service.
+	 * @param domain the fully qualified domain name.
+	 */
 	public ServiceName(String name, ServiceType type, String domain) {
 		this.name = name;
 		this.type = type;
 		this.domain = domain;
 	}
 
+	/**
+	 * Get the service name.
+	 * @return the service name.
+	 */
 	public String getName() {
 		return name;
 	}
 
+	/**
+	 * Get the service type.
+	 * @return the service type.
+	 */
 	public ServiceType getType() {
 		return type;
 	}
 
+	/**
+	 * Get the fully qualified domain name.
+	 * @return the domain name.
+	 */
 	public String getDomain() {
 		return domain;
 	}
@@ -74,6 +100,11 @@ public class ServiceName {
 		return hash;
 	}
 
+	/**
+	 * Convert to a dnsjava {@link Name}.
+	 * This is an internal helper method.
+	 * @return the ServiceName as a Name.
+	 */
 	Name toDnsName() {
 		try {
 			Name dnsname = Name.fromString(domain);
@@ -86,6 +117,11 @@ public class ServiceName {
 		}
 	}
 
+	/**
+	 * Make a new ServiceName from a dnsjava {@link Name}.
+	 * @param dnsname the Name to convert.
+	 * @return the Name as a ServiceName.
+	 */
 	static ServiceName fromDnsName(Name dnsname) {
 		if (dnsname.labels() < 4) {
 			throw new IllegalArgumentException("Too few labels in service name: " + dnsname);
@@ -97,11 +133,25 @@ public class ServiceName {
 		return new ServiceName(name, new ServiceType(type, transport), domain);
 	}
 
+	/**
+	 * Decode a raw DNS label into a string.
+	 * The methods in dnsjava don't understand UTF-8 and escapes some characters,
+	 * we don't want that here.
+	 * @param label the raw label data.
+	 * @return the decoded string.
+	 */
 	private static String decodeName(byte[] label) {
 		// First byte is length
 		return new String(label, 1, label.length - 1, NET_UNICODE);
 	}
 
+	/**
+	 * Encode a string into a raw DNS label.
+	 * The methods in dnsjava don't understand UTF-8 and escapes some characters,
+	 * we don't want that here.
+	 * @param s the string to encode.
+	 * @return the raw DNS label.
+	 */
 	private byte[] encodeName(String s) {
 		byte[] tmp = s.getBytes(NET_UNICODE);
 		if (tmp.length > 63) {

@@ -22,13 +22,17 @@ import org.xbill.DNS.ReverseMap;
 import org.xbill.DNS.TextParseException;
 
 /**
- *
- * @author daniel.nilsson
+ * Internal helper class for figuring out domain names.
+ * @author Daniel Nilsson
  */
 class DomainUtil {
 
 	private static final Logger logger = Logger.getLogger(DomainUtil.class.getName());
 
+	/**
+	 * Try to figure out the domain name for the computer.
+	 * @return a list of potential domain names.
+	 */
 	static List<Name> getComputerDomains() {
 		List<Name> results = new ArrayList<Name>();
 		try {
@@ -65,6 +69,13 @@ class DomainUtil {
 		return results;
 	}
 
+	/**
+	 * Calculate the network address by taking the bitwise AND
+	 * between the IP-address and the netmask.
+	 * @param ifaddr the interface address to calculate the network address of. 
+	 * @return the network address (host part is all zero).
+	 * @throws UnknownHostException if something went terribly wrong.
+	 */
 	static InetAddress calculateNetworkAddress(InterfaceAddress ifaddr) throws UnknownHostException {
 		byte[] addr = ifaddr.getAddress().getAddress();
 		int n = ifaddr.getNetworkPrefixLength();

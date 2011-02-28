@@ -6,11 +6,16 @@
 package com.github.danieln.dnssdjava;
 
 /**
- *
- * @author daniel.nilsson
+ * Identifiers for service types.
+ * A DNS-SD service type consists of the application protocol name
+ * prepended with an underscore and the transport protocol (TCP or UDP).
+ * @author Daniel Nilsson
  */
 public class ServiceType {
 
+	/**
+	 * The transport protocol.
+	 */
 	public enum Transport {
 		TCP("_tcp"),
 		UDP("_udp");
@@ -21,6 +26,10 @@ public class ServiceType {
 			this.label = label;
 		}
 
+		/**
+		 * Get the DNS label.
+		 * @return the DNS label.
+		 */
 		String getLabel() {
 			return label;
 		}
@@ -30,6 +39,11 @@ public class ServiceType {
 			return label;
 		}
 
+		/**
+		 * Get the Transport corresponding to a DNS label.
+		 * @param label the DNS label.
+		 * @return the corresponding Transport constant.
+		 */
 		static Transport fromLabel(String label) {
 			for (Transport t : values()) {
 				if (t.getLabel().equalsIgnoreCase(label)) {
@@ -43,19 +57,38 @@ public class ServiceType {
 	private final String type;
 	private final Transport transport;
 
+	/**
+	 * Create a new ServiceType.
+	 * @param type the service type (eg. "_http");
+	 * @param transport the transport protocol.
+	 */
 	public ServiceType(String type, Transport transport) {
 		this.type = type;
 		this.transport = transport;
 	}
 
+	/**
+	 * Create a new ServiceType.
+	 * For internal use only.
+	 * @param type the service type.
+	 * @param transport the transport DNS label.
+	 */
 	ServiceType(String type, String transport) {
 		this(type, Transport.fromLabel(transport));
 	}
 
+	/**
+	 * Get the service type.
+	 * @return the service type.
+	 */
 	public String getType() {
 		return type;
 	}
 
+	/**
+	 * Get the transport protocol.
+	 * @return the transport protocol.
+	 */
 	public Transport getTransport() {
 		return transport;
 	}

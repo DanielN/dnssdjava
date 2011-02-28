@@ -23,8 +23,8 @@ import org.xbill.DNS.TextParseException;
 import org.xbill.DNS.Type;
 
 /**
- *
- * @author daniel.nilsson
+ * Unicast {@link DnsSDBrowser} implementation backed by dnsjava.
+ * @author Daniel Nilsson
  */
 class UnicastDnsSDBrowser implements DnsSDBrowser {
 
@@ -34,6 +34,10 @@ class UnicastDnsSDBrowser implements DnsSDBrowser {
 
 	private final List<Name> browserDomains;
 
+	/**
+	 * Create a new UnicastDnsSDBrowser.
+	 * @param browserDomains list of domain names to browse.
+	 */
 	UnicastDnsSDBrowser(List<Name> browserDomains) {
 		this.browserDomains = browserDomains;
 		logger.log(Level.INFO, "Created DNS-SD Browser for domains: {0}", browserDomains);
@@ -109,6 +113,11 @@ class UnicastDnsSDBrowser implements DnsSDBrowser {
 		return data;
 	}
 
+	/**
+	 * Get the service types from a single domain.
+	 * @param domainName the domain to browse.
+	 * @return a list of service types.
+	 */
 	private List<ServiceType> getServiceTypes(Name domainName) {
 		try {
 			List<ServiceType> results = new ArrayList<ServiceType>();
@@ -131,6 +140,12 @@ class UnicastDnsSDBrowser implements DnsSDBrowser {
 		}
 	}
 
+	/**
+	 * Get all service names of a specific type in a single domain.
+	 * @param type the service type.
+	 * @param domainName the domain to browse.
+	 * @return a list of service names.
+	 */
 	private List<ServiceName> getServiceInstances(ServiceType type, Name domainName) {
 		try {
 			Name typeDomainName = Name.fromString(type.toString(), domainName);

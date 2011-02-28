@@ -6,8 +6,9 @@ import java.util.Collection;
 import com.github.danieln.dnssdjava.ServiceType.Transport;
 
 /**
- *
- * @author daniel.nilsson
+ * Test application for doing testing during development.
+ * The code is not meant as an example of how to use the library.
+ * @author Daniel Nilsson
  */
 public class TestApp {
 

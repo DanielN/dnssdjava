@@ -16,7 +16,7 @@ import org.xbill.DNS.TextParseException;
 /**
  * Factory class for creating {@link DnsSDBrowser}, {@link DnsSDRegistrator} and
  * {@link DnsSDDomainEnumerator} objects.
- * @author daniel.nilsson
+ * @author Daniel Nilsson
  */
 public class DnsSDFactory {
 

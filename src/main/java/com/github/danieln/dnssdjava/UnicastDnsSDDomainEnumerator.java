@@ -19,8 +19,8 @@ import org.xbill.DNS.Record;
 import org.xbill.DNS.Type;
 
 /**
- *
- * @author daniel.nilsson
+ * Unicast {@link DnsSDDomainEnumerator} implementation backed by dnsjava.
+ * @author Daniel Nilsson
  */
 class UnicastDnsSDDomainEnumerator implements DnsSDDomainEnumerator {
 
@@ -34,6 +34,10 @@ class UnicastDnsSDDomainEnumerator implements DnsSDDomainEnumerator {
 
 	private final List<Name> computerDomains;
 
+	/**
+	 * Create a UnicastDnsSDDomainEnumerator.
+	 * @param computerDomains the list of domains to query for browsing and registering domains.
+	 */
 	UnicastDnsSDDomainEnumerator(List<Name> computerDomains) {
 		this.computerDomains = computerDomains;
 		logger.log(Level.INFO, "Created DNS-SD DomainEnumerator for computer domains: {0}", computerDomains);
@@ -64,6 +68,12 @@ class UnicastDnsSDDomainEnumerator implements DnsSDDomainEnumerator {
 		return getDomains(LB_DNSSD_UDP);
 	}
 
+	/**
+	 * Get all domains pointed to by the given resource record name,
+	 * searching all computer domains.
+	 * @param rrName the DNS resource record name.
+	 * @return a collection of domain names.
+	 */
 	private Collection<String> getDomains(Name rrName) {
 		List<String> results = new ArrayList<String>();
 		for (Name domain : computerDomains) {
@@ -72,6 +82,12 @@ class UnicastDnsSDDomainEnumerator implements DnsSDDomainEnumerator {
 		return results;
 	}
 
+	/**
+	 * Get one domain pointed to by the given resource record name,
+	 * searching all computer domains.
+	 * @param rrName the DNS resource record name.
+	 * @return a domain name, the first one found.
+	 */
 	private String getDomain(Name rrName) {
 		for (Name domain : computerDomains) {
 			List<String> domains = getDomains(rrName, domain);
@@ -82,6 +98,12 @@ class UnicastDnsSDDomainEnumerator implements DnsSDDomainEnumerator {
 		return null;
 	}
 
+	/**
+	 * Get all domains pointed to by the given resource record name,
+	 * looking in a single computer domain.
+	 * @param rrName the DNS resource record name.
+	 * @return a collection of domain names.
+	 */
 	private List<String> getDomains(Name rrName, Name domainName) {
 		try {
 			List<String> results = new ArrayList<String>();

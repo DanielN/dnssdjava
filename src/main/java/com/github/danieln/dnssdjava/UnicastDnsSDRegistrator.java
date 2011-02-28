@@ -34,8 +34,8 @@ import org.xbill.DNS.Update;
 
 
 /**
- *
- * @author daniel.nilsson
+ * Unicast {@link DnsSDRegistrator} implementation backed by dnsjava.
+ * @author Daniel Nilsson
  */
 class UnicastDnsSDRegistrator implements DnsSDRegistrator {
 
@@ -48,6 +48,11 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
 	private final Resolver resolver;
 	private final Name servicesName;
 
+	/**
+	 * Create a UnicastDnsSDRegistrator.
+	 * @param registrationDomain the registration domain.
+	 * @throws UnknownHostException if the DNS server name for the domain failed to resolve.
+	 */
 	UnicastDnsSDRegistrator(Name registrationDomain) throws UnknownHostException {
 		try {
 			this.registrationDomain = registrationDomain;
@@ -59,6 +64,12 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
 		}
 	}
 
+	/**
+	 * Create a DNS {@link Resolver} to handle updates to the given domain.
+	 * @param domain the domain for which updates will be generated.
+	 * @return a Resolver configured with the DNS server that handles zone for that domain.
+	 * @throws UnknownHostException if the DNS server name for the domain failed to resolve.
+	 */
 	private Resolver findUpdateResolver(Name domain) throws UnknownHostException {
 		SimpleResolver simpleResolver = null;
 		try {
