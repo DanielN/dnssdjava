@@ -6,8 +6,16 @@ Author: Daniel Nilsson (dnssdjava at daniel-nilsson dot com)
 
 Overview:
 
-This library provides service discovery and registration using DNS-SD
+This library provides service discovery and registration using DNS-SD[1]
 to Java applications.
+
+[1] http://www.dns-sd.org/
+
+
+Acknowledgments:
+
+The low level DNS communication is provided by dnsjava, a pure java DNS
+implementation by Brian Wellington. [http://www.dnsjava.org/]
 
 
 License:
