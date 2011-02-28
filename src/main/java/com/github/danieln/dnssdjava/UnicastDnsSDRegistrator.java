@@ -48,6 +48,8 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
 	private final Resolver resolver;
 	private final Name servicesName;
 
+	private int timeToLive = 60;
+	
 	/**
 	 * Create a UnicastDnsSDRegistrator.
 	 * @param registrationDomain the registration domain.
@@ -108,6 +110,16 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
 	}
 	
 	@Override
+	public int getTimeToLive() {
+		return timeToLive;
+	}
+	
+	@Override
+	public void setTimeToLive(int ttl) {
+		timeToLive = ttl;
+	}
+	
+	@Override
 	public boolean registerService(ServiceData serviceData) throws DnsSDException {
 		try {
 			ServiceName serviceName = serviceData.getName();
@@ -129,10 +141,10 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
 			}
 			Update update = new Update(registrationDomain);		// XXX Should really be the zone (SOA) for the RRs we are about to add
 			update.absent(dnsName);
-			update.add(new PTRRecord(servicesName, DClass.IN, 60, typeName));
-			update.add(new PTRRecord(typeName, DClass.IN, 60, dnsName));
-			update.add(new SRVRecord(dnsName, DClass.IN, 60, 0, 0, serviceData.getPort(), target));
-			update.add(new TXTRecord(dnsName, DClass.IN, 60, strings));
+			update.add(new PTRRecord(servicesName, DClass.IN, timeToLive, typeName));
+			update.add(new PTRRecord(typeName, DClass.IN, timeToLive, dnsName));
+			update.add(new SRVRecord(dnsName, DClass.IN, timeToLive, 0, 0, serviceData.getPort(), target));
+			update.add(new TXTRecord(dnsName, DClass.IN, timeToLive, strings));
 			Message response = resolver.send(update);
 			switch (response.getRcode()) {
 				case Rcode.NOERROR:
@@ -156,7 +168,7 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
 			Name typeName = new Name(serviceName.getType().toString(), registrationDomain);
 			Update update = new Update(registrationDomain);		// XXX Should really be the zone (SOA) for the RRs we are about to remove
 			update.present(dnsName);
-			update.delete(new PTRRecord(typeName, DClass.IN, 60, dnsName));
+			update.delete(new PTRRecord(typeName, DClass.IN, timeToLive, dnsName));
 			update.delete(dnsName);
 			Message response = resolver.send(update);
 			switch (response.getRcode()) {

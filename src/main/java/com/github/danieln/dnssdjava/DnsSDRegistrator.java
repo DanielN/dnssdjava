@@ -33,6 +33,18 @@ public interface DnsSDRegistrator {
 	String getLocalHostName() throws UnknownHostException;
 	
 	/**
+	 * Get the time to live value that will be used for new DNS records.
+	 * @return the TTL value in seconds.
+	 */
+	int getTimeToLive();
+	
+	/**
+	 * Set the time to live value that will be used for new DNS records.
+	 * @param ttl the new TTL value in seconds.
+	 */
+	void setTimeToLive(int ttl);
+	
+	/**
 	 * Add a new service to DNS-SD.
 	 * If the service name is already taken this method will not update the service data,
 	 * but return false to indicate the collision.
