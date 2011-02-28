@@ -12,7 +12,7 @@ import java.net.UnknownHostException;
  *
  * @author daniel.nilsson
  */
-interface DnsSDRegistrator {
+public interface DnsSDRegistrator {
 
 	ServiceName makeServiceName(String name, ServiceType type);
 
