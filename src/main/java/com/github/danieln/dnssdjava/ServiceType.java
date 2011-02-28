@@ -21,7 +21,7 @@ public class ServiceType {
 			this.label = label;
 		}
 
-		public String getLabel() {
+		String getLabel() {
 			return label;
 		}
 
