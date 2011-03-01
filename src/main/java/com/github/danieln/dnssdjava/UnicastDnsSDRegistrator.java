@@ -32,7 +32,6 @@ import org.xbill.DNS.TXTRecord;
 import org.xbill.DNS.TextParseException;
 import org.xbill.DNS.Type;
 import org.xbill.DNS.Update;
-import org.xbill.DNS.utils.base64;
 
 
 /**
@@ -122,9 +121,9 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
 	}
 
 	@Override
-	public void setTSIGKey(String name, String key) {
-		if (name != null && key != null) {
-			resolver.setTSIGKey(new TSIG(name, key));
+	public void setTSIGKey(String name, String algorithm, String key) {
+		if (name != null && algorithm != null && key != null) {
+			resolver.setTSIGKey(new TSIG(algorithm, name, key));
 		} else {
 			resolver.setTSIGKey(null);
 		}

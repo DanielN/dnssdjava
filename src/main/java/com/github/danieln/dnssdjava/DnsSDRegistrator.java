@@ -46,10 +46,13 @@ public interface DnsSDRegistrator {
 	
 	/**
 	 * Set the TSIG key used to authenticate updates sent to the DNS server.
+	 * Passing null for all values to disable TSIG authentication.
 	 * @param name the name of the key.
+	 * @param signature algorithm, one of {@link #TSIG_ALGORITHM_HMAC_MD5},
+	 *        {@link #TSIG_ALGORITHM_HMAC_SHA1}, {@link #TSIG_ALGORITHM_HMAC_SHA256} 
 	 * @param key the base64 encoded key.
 	 */
-	void setTSIGKey(String name, String key);
+	void setTSIGKey(String name, String algorithm, String key);
 
 	/**
 	 * Add a new service to DNS-SD.
@@ -68,5 +71,20 @@ public interface DnsSDRegistrator {
 	 * @throws DnsSDException if the service couldn't be unregistered due to some error.
 	 */
 	boolean unregisterService(ServiceName serviceName) throws DnsSDException;
+
+	/**
+	 * Constant specifying the hmac-md5 TSIG algorithm.
+	 */
+	String TSIG_ALGORITHM_HMAC_MD5 = "hmac-md5";
+
+	/**
+	 * Constant specifying the hmac-sha1 TSIG algorithm.
+	 */
+	String TSIG_ALGORITHM_HMAC_SHA1 = "hmac-sha1";
+
+	/**
+	 * Constant specifying the hmac-sha256 TSIG algorithm.
+	 */
+	String TSIG_ALGORITHM_HMAC_SHA256 = "hmac-sha256";
 
 }
