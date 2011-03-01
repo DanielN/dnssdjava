@@ -1,0 +1,23 @@
+$TTL    86400
+@                       IN SOA  ns.example.com. admin.example.com. (
+                                    1          ; serial
+                                    3H         ; refresh
+                                    15M        ; retry
+                                    52W        ; expiry
+                                    1D         ; minimum
+                                )
+                        IN NS   ns.example.com.
+
+; This record specifies the DNS server responsible for the services zone
+services                IN NS   ns.example.com.
+
+; These records tell clients where to browse and register
+b._dns-sd._udp          IN PTR  services.example.com.
+db._dns-sd._udp         IN PTR  services.example.com.
+lb._dns-sd._udp         IN PTR  services.example.com.
+r._dns-sd._udp          IN PTR  services.example.com.
+dr._dns-sd._udp         IN PTR  services.example.com.
+
+; You normal records follow here...
+ns                      IN A    192.168.1.1
+host1                   IN A    192.168.1.11

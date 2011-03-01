@@ -1,0 +1,19 @@
+$TTL 60 ; 1 minute
+@                       IN SOA  ns.example.com. admin.example.com. (
+                                    1          ; serial
+                                    300        ; refresh (5 minutes)
+                                    240        ; retry (4 minutes)
+                                    600        ; expire (10 minutes)
+                                    60         ; minimum (1 minute)
+                                )
+                        IN NS   ns.example.com.
+
+; These records tell clients to browse and register here
+b._dns-sd._udp          IN PTR  services.example.com.
+db._dns-sd._udp         IN PTR  services.example.com.
+lb._dns-sd._udp         IN PTR  services.example.com.
+r._dns-sd._udp          IN PTR  services.example.com.
+dr._dns-sd._udp         IN PTR  services.example.com.
+
+; This record specifies the DNS server responsible for updates to the zone
+_dns-update._udp        IN SRV  0 0 53 ns.example.com.
