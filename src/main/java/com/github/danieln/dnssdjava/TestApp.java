@@ -2,6 +2,8 @@ package com.github.danieln.dnssdjava;
 
 import java.net.UnknownHostException;
 import java.util.Collection;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.github.danieln.dnssdjava.ServiceType.Transport;
 
@@ -14,6 +16,8 @@ public class TestApp {
 
 	public static void main(String args[]) {
 
+		Logger.getLogger("com.github.danieln.dnssdjava").setLevel(Level.ALL);
+		
 		try {
 			DnsSDRegistrator reg = DnsSDFactory.getInstance().createRegistrator();
 			ServiceName name = reg.makeServiceName("MyTestService", new ServiceType("_http", Transport.TCP));
