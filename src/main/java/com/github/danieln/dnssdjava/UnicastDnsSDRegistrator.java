@@ -173,12 +173,29 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
 			Message response = resolver.send(update);
 			switch (response.getRcode()) {
 				case Rcode.NOERROR:
-					return true;
+					break;
 				case Rcode.NXDOMAIN:	// Prerequisite failed, the service doesn't exist.
 					return false;
 				default:
 					throw new DnsSDException("Server returned error code: " + Rcode.string(response.getRcode()));
 			}
+			// Remove the service type if there are no instances left
+			update = new Update(registrationDomain);		// XXX Should really be the zone (SOA) for the RRs we are about to remove
+			update.absent(typeName);
+			update.delete(new PTRRecord(servicesName, DClass.IN, timeToLive, typeName));
+			response = resolver.send(update);
+			switch (response.getRcode()) {
+				case Rcode.NOERROR:
+					logger.log(Level.FINE, "Removed service type record {0}", typeName);
+					break;
+				case Rcode.YXDOMAIN:	// Prerequisite failed, service instances exists
+					logger.log(Level.FINE, "Did not remove service type record {0}, instances left.", typeName);
+					break;
+				default:
+					logger.log(Level.WARNING, "Failed to remove service type {0}, server returned status {1}",
+							new Object[] { typeName, Rcode.string(response.getRcode()) });
+			}
+			return true;
 		} catch (TextParseException ex) {
 			throw new IllegalArgumentException("Invalid service name: " + serviceName, ex);
 		} catch (IOException ex) {
