@@ -27,10 +27,12 @@ import org.xbill.DNS.Record;
 import org.xbill.DNS.Resolver;
 import org.xbill.DNS.SRVRecord;
 import org.xbill.DNS.SimpleResolver;
+import org.xbill.DNS.TSIG;
 import org.xbill.DNS.TXTRecord;
 import org.xbill.DNS.TextParseException;
 import org.xbill.DNS.Type;
 import org.xbill.DNS.Update;
+import org.xbill.DNS.utils.base64;
 
 
 /**
@@ -117,6 +119,15 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
 	@Override
 	public void setTimeToLive(int ttl) {
 		timeToLive = ttl;
+	}
+
+	@Override
+	public void setTSIGKey(String name, String key) {
+		if (name != null && key != null) {
+			resolver.setTSIGKey(new TSIG(name, key));
+		} else {
+			resolver.setTSIGKey(null);
+		}
 	}
 	
 	@Override

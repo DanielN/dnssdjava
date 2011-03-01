@@ -45,6 +45,13 @@ public interface DnsSDRegistrator {
 	void setTimeToLive(int ttl);
 	
 	/**
+	 * Set the TSIG key used to authenticate updates sent to the DNS server.
+	 * @param name the name of the key.
+	 * @param key the base64 encoded key.
+	 */
+	void setTSIGKey(String name, String key);
+
+	/**
 	 * Add a new service to DNS-SD.
 	 * If the service name is already taken this method will not update the service data,
 	 * but return false to indicate the collision.
