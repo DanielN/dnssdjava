@@ -23,7 +23,21 @@ public abstract class DnsSDFactory {
 	 */
 	public static synchronized DnsSDFactory getInstance() {
 		if (instance == null) {
-			instance = new UnicastDnsSDFactory();
+			String factoryClassName = System.getProperty("com.github.danieln.dnssdjava.factory");
+			if (factoryClassName != null) {
+				try {
+					Class<?> factoryClass = Class.forName(factoryClassName);
+					instance = (DnsSDFactory) factoryClass.newInstance();
+				} catch (ClassNotFoundException e) {
+					throw new RuntimeException(e);
+				} catch (InstantiationException e) {
+					throw new RuntimeException(e);
+				} catch (IllegalAccessException e) {
+					throw new RuntimeException(e);
+				}
+			} else {
+				instance = new UnicastDnsSDFactory();
+			}
 		}
 		return instance;
 	}
