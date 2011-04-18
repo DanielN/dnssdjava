@@ -38,16 +38,30 @@ public class DnsSDFactory {
 
 	/**
 	 * Create a {@link DnsSDDomainEnumerator} that finds the browsing
+	 * and registration domains for the given computer domains.
+	 * @param computerDomains the domain names to try.
+	 * @return a new {@link DnsSDDomainEnumerator}.
+	 */
+	public DnsSDDomainEnumerator createDomainEnumerator(Collection<String> computerDomains) {
+		List<Name> domains = new ArrayList<Name>(computerDomains.size());
+		for (String domain : computerDomains) {
+			try {
+				domains.add(Name.fromString(domain));
+			} catch (TextParseException ex) {
+				throw new IllegalArgumentException("Invalid domain name: " + domain, ex);
+			}
+		}
+		return new UnicastDnsSDDomainEnumerator(domains);
+	}
+
+	/**
+	 * Create a {@link DnsSDDomainEnumerator} that finds the browsing
 	 * and registration domains for the given computer domain.
 	 * @param computerDomain the domain name.
 	 * @return a new {@link DnsSDDomainEnumerator}.
 	 */
 	public DnsSDDomainEnumerator createDomainEnumerator(String computerDomain) {
-		try {
-			return new UnicastDnsSDDomainEnumerator(Collections.singletonList(Name.fromString(computerDomain)));
-		} catch (TextParseException ex) {
-			throw new IllegalArgumentException("Invalid domain name: " + computerDomain, ex);
-		}
+		return createDomainEnumerator(Collections.singletonList(computerDomain));
 	}
 
 	/**
@@ -56,7 +70,7 @@ public class DnsSDFactory {
 	 * @return a new {@link DnsSDDomainEnumerator}.
 	 */
 	public DnsSDDomainEnumerator createDomainEnumerator() {
-		return new UnicastDnsSDDomainEnumerator(DomainUtil.getComputerDomains());
+		return createDomainEnumerator(DomainUtil.getComputerDomains());
 	}
 
 	/**

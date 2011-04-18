@@ -33,8 +33,8 @@ class DomainUtil {
 	 * Try to figure out the domain name for the computer.
 	 * @return a list of potential domain names.
 	 */
-	static List<Name> getComputerDomains() {
-		List<Name> results = new ArrayList<Name>();
+	static List<String> getComputerDomains() {
+		List<String> results = new ArrayList<String>();
 		try {
 			Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
 			while (interfaces.hasMoreElements()) {
@@ -46,7 +46,7 @@ class DomainUtil {
 							// Try to figure out the domain by taking the host name...
 							String hostname = Address.getHostName(inetAddr);
 							// ...and remove the leftmost part.
-							results.add(new Name(new Name(hostname), 1));
+							results.add(new Name(new Name(hostname), 1).toString());
 						} catch (TextParseException ex) {
 							logger.log(Level.WARNING, "Bad hostname", ex);
 						} catch (UnknownHostException ex) {
@@ -56,7 +56,7 @@ class DomainUtil {
 							// Use the reverse lookup name for the network
 							InetAddress network = calculateNetworkAddress(ifaddr);
 							Name revName = ReverseMap.fromAddress(network);
-							results.add(revName);
+							results.add(revName.toString());
 						} catch (UnknownHostException ex) {
 							logger.log(Level.WARNING, "Failed to calculate network address", ex);
 						}
