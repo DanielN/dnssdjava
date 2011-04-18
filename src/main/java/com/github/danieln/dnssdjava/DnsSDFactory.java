@@ -5,20 +5,15 @@
  */
 package com.github.danieln.dnssdjava;
 
-import java.net.UnknownHostException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
-import org.xbill.DNS.Name;
-import org.xbill.DNS.TextParseException;
 
 /**
  * Factory class for creating {@link DnsSDBrowser}, {@link DnsSDRegistrator} and
  * {@link DnsSDDomainEnumerator} objects.
  * @author Daniel Nilsson
  */
-public class DnsSDFactory {
+public abstract class DnsSDFactory {
 
 	private static DnsSDFactory instance;
 
@@ -28,7 +23,7 @@ public class DnsSDFactory {
 	 */
 	public static synchronized DnsSDFactory getInstance() {
 		if (instance == null) {
-			instance = new DnsSDFactory();
+			instance = new UnicastDnsSDFactory();
 		}
 		return instance;
 	}
@@ -42,17 +37,7 @@ public class DnsSDFactory {
 	 * @param computerDomains the domain names to try.
 	 * @return a new {@link DnsSDDomainEnumerator}.
 	 */
-	public DnsSDDomainEnumerator createDomainEnumerator(Collection<String> computerDomains) {
-		List<Name> domains = new ArrayList<Name>(computerDomains.size());
-		for (String domain : computerDomains) {
-			try {
-				domains.add(Name.fromString(domain));
-			} catch (TextParseException ex) {
-				throw new IllegalArgumentException("Invalid domain name: " + domain, ex);
-			}
-		}
-		return new UnicastDnsSDDomainEnumerator(domains);
-	}
+	public abstract DnsSDDomainEnumerator createDomainEnumerator(Collection<String> computerDomains);
 
 	/**
 	 * Create a {@link DnsSDDomainEnumerator} that finds the browsing
@@ -98,17 +83,7 @@ public class DnsSDFactory {
 	 * @param browserDomains collection of domain names to browse.
 	 * @return a new {@link DnsSDBrowser}.
 	 */
-	public DnsSDBrowser createBrowser(Collection<String> browserDomains) {
-		List<Name> domains = new ArrayList<Name>(browserDomains.size());
-		for (String domain : browserDomains) {
-			try {
-				domains.add(Name.fromString(domain));
-			} catch (TextParseException ex) {
-				throw new IllegalArgumentException("Invalid domain name: " + domain, ex);
-			}
-		}
-		return new UnicastDnsSDBrowser(domains);
-	}
+	public abstract DnsSDBrowser createBrowser(Collection<String> browserDomains);
 
 	/**
 	 * Create a {@link DnsSDBrowser} that finds services in the
@@ -146,15 +121,7 @@ public class DnsSDFactory {
 	 * @return a new {@link DnsSDRegistrator}.
 	 * @throws DnsSDException if the registrator can't be created.
 	 */
-	public DnsSDRegistrator createRegistrator(String registeringDomain) throws DnsSDException {
-		try {
-			return new UnicastDnsSDRegistrator(Name.fromString(registeringDomain));
-		} catch (UnknownHostException ex) {
-			throw new DnsSDException("Failed to find DNS update server for domain: " + registeringDomain, ex);
-		} catch (TextParseException ex) {
-			throw new IllegalArgumentException("Invalid domain name: " + registeringDomain, ex);
-		}
-	}
+	public abstract DnsSDRegistrator createRegistrator(String registeringDomain) throws DnsSDException;
 
 	/**
 	 * Create a {@link DnsSDRegistrator} that registers services in the
