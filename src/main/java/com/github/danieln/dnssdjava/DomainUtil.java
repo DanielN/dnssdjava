@@ -70,6 +70,34 @@ class DomainUtil {
 	}
 
 	/**
+	 * Try to figure out the host name for the computer.
+	 * @return a list of potential host names.
+	 */
+	static List<String> getComputerHostNames() {
+		List<String> results = new ArrayList<String>();
+		try {
+			Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+			while (interfaces.hasMoreElements()) {
+				NetworkInterface i = interfaces.nextElement();
+				if (i.isUp() && !i.isLoopback()) {
+					for (InterfaceAddress ifaddr : i.getInterfaceAddresses()) {
+						InetAddress inetAddr = ifaddr.getAddress();
+						try {
+							String hostname = Address.getHostName(inetAddr);
+							results.add(hostname);
+						} catch (UnknownHostException ex) {
+							logger.log(Level.FINE, "No hostname for address: {0}", inetAddr);
+						}
+					}
+				}
+			}
+		} catch (SocketException ex) {
+			logger.log(Level.WARNING, "Failed to enumerate network interfaces", ex);
+		}
+		return results;
+	}
+
+	/**
 	 * Calculate the network address by taking the bitwise AND
 	 * between the IP-address and the netmask.
 	 * @param ifaddr the interface address to calculate the network address of. 

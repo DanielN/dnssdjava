@@ -50,6 +50,7 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
 	private final Name servicesName;
 
 	private int timeToLive = 60;
+	private String localHostname;
 	
 	/**
 	 * Create a UnicastDnsSDRegistrator.
@@ -107,7 +108,22 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
 	
 	@Override
 	public String getLocalHostName() throws UnknownHostException {
-		return Address.getHostName(InetAddress.getLocalHost());
+		if (localHostname == null) {
+			List<String> names = new ArrayList<String>();
+			names.addAll(DomainUtil.getComputerHostNames());
+			names.add(InetAddress.getLocalHost().getCanonicalHostName());
+			names.add(InetAddress.getLocalHost().getHostName());
+			for (String name : names) {
+				if (!name.startsWith("localhost") && !name.matches("^([0-9]{1,3}\\.){3}[0-9]{1,3}$")) {
+					localHostname = name.endsWith(".") ? name : (name + ".");
+					break;
+				}
+			}
+		}
+		if (localHostname == null) {
+			throw new UnknownHostException();
+		}
+		return localHostname;
 	}
 	
 	@Override
