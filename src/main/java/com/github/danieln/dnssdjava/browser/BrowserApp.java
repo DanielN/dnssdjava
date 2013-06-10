@@ -62,6 +62,7 @@ public class BrowserApp extends JFrame {
 	private JTextField computerDomainField;
 	private JComboBox browsingDomainCombo;
 	private JList serviceTypeList;
+	private JTextField subtypeField;
 	private JList serviceInstanceList;
 	private JTextField nameField;
 	private JTextField hostField;
@@ -87,6 +88,9 @@ public class BrowserApp extends JFrame {
 		serviceTypeList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		serviceTypeList.addListSelectionListener(listener);
 		JScrollPane serviceTypeScroll = new JScrollPane(serviceTypeList);
+		JLabel subtypeLabel = new JLabel("Subtypes:");
+		subtypeField = new JTextField(20);
+		subtypeField.addActionListener(listener);
 		JLabel serviceInstanceLabel = new JLabel("Service Instances:");
 		serviceInstanceList = new JList();
 		serviceInstanceList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -124,7 +128,9 @@ public class BrowserApp extends JFrame {
 						.addComponent(browsingDomainLabel)
 						.addComponent(browsingDomainCombo)
 						.addComponent(serviceTypeLabel)
-						.addComponent(serviceTypeScroll))
+						.addComponent(serviceTypeScroll)
+						.addComponent(subtypeLabel)
+						.addComponent(subtypeField))
 				.addPreferredGap(ComponentPlacement.UNRELATED)
 				.addGroup(layout.createParallelGroup()
 						.addComponent(serviceInstanceLabel)
@@ -155,7 +161,11 @@ public class BrowserApp extends JFrame {
 						.addPreferredGap(ComponentPlacement.UNRELATED)
 						.addComponent(serviceTypeLabel)
 						.addPreferredGap(ComponentPlacement.RELATED)
-						.addComponent(serviceTypeScroll))
+						.addComponent(serviceTypeScroll)
+						.addPreferredGap(ComponentPlacement.UNRELATED)
+						.addComponent(subtypeLabel)
+						.addPreferredGap(ComponentPlacement.RELATED)
+						.addComponent(subtypeField, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
 				.addGroup(layout.createSequentialGroup()
 						.addComponent(serviceInstanceLabel)
 						.addPreferredGap(ComponentPlacement.RELATED)
@@ -248,6 +258,7 @@ public class BrowserApp extends JFrame {
 		new SwingWorker<Void, Void>() {
 
 			private final ServiceType type = (ServiceType) serviceTypeList.getSelectedValue();
+			private final String subtypeList = subtypeField.getText();
 			private final DnsSDBrowser browser = serviceBrowser;
 			
 			private DefaultListModel model;
@@ -256,7 +267,12 @@ public class BrowserApp extends JFrame {
 			protected Void doInBackground() throws Exception {
 				model = new DefaultListModel();
 				if (type != null && browser != null) {
-					Collection<ServiceName> instances = browser.getServiceInstances(type);
+					ServiceType typeToBrowse = type;
+					if (!subtypeList.isEmpty()) {
+						String[] subtypes = subtypeList.split(",");
+						typeToBrowse = typeToBrowse.withSubtypes(subtypes);
+					}
+					Collection<ServiceName> instances = browser.getServiceInstances(typeToBrowse);
 					for (ServiceName serviceName : instances) {
 						model.addElement(serviceName);
 					}
@@ -323,6 +339,8 @@ public class BrowserApp extends JFrame {
 				computerDomainChanged();
 			} else if (e.getSource() == browsingDomainCombo) {
 				browsingDomainChanged();
+			} else if (e.getSource() == subtypeField) {
+				serviceTypeChanged();
 			}
 		}
 

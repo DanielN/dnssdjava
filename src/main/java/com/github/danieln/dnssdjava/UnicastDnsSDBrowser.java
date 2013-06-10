@@ -141,15 +141,35 @@ class UnicastDnsSDBrowser implements DnsSDBrowser {
 	}
 
 	/**
-	 * Get all service names of a specific type in a single domain.
+	 * Get all service names of a service type in a single domain.
+	 * If the specified type has subtypes then only instances registered under any of those are returned.
 	 * @param type the service type.
 	 * @param domainName the domain to browse.
 	 * @return a list of service names.
 	 */
 	private List<ServiceName> getServiceInstances(ServiceType type, Name domainName) {
-		try {
-			Name typeDomainName = Name.fromString(type.toString(), domainName);
+		if (type.getSubtypes().isEmpty()) {
 			List<ServiceName> results = new ArrayList<ServiceName>();
+			getServiceInstances(type.toString(), domainName, results);
+			return results;
+		} else {
+			Set<ServiceName> results = new HashSet<ServiceName>();
+			for (String subtype : type.toStringsWithSubtype()) {
+				getServiceInstances(subtype, domainName, results);
+			}
+			return new ArrayList<ServiceName>(results);
+		}
+	}
+
+	/**
+	 * Get all service names of a specific type in a single domain.
+	 * @param type the service type as a string, including transport and subtype (if any).
+	 * @param domainName the domain to browse.
+	 * @param results a collection to put found service names into.
+	 */
+	private void getServiceInstances(String type, Name domainName, Collection<ServiceName> results) {
+		try {
+			Name typeDomainName = Name.fromString(type, domainName);
 			Lookup lookup = new Lookup(typeDomainName, Type.PTR);
 			Record[] records = lookup.run();
 			if (records != null) {
@@ -161,7 +181,6 @@ class UnicastDnsSDBrowser implements DnsSDBrowser {
 					}
 				}
 			}
-			return results;
 		} catch (TextParseException ex) {
 			throw new IllegalArgumentException("Invalid type: " + type, ex);
 		}

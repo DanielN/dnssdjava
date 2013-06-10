@@ -151,6 +151,10 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
 			ServiceName serviceName = serviceData.getName();
 			Name dnsName = serviceName.toDnsName();
 			Name typeName = new Name(serviceName.getType().toString(), registrationDomain);
+			List<Name> subtypes = new ArrayList<Name>(serviceName.getType().getSubtypes().size());
+			for (String subtype : serviceName.getType().toStringsWithSubtype()) {
+				subtypes.add(new Name(subtype, registrationDomain));
+			}
 			Name target = new Name(serviceData.getHost());
 			List<String> strings = new ArrayList<String>();
 			for (Map.Entry<String, String> entry : serviceData.getProperties().entrySet()) {
@@ -169,6 +173,9 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
 			update.absent(dnsName);
 			update.add(new PTRRecord(servicesName, DClass.IN, timeToLive, typeName));
 			update.add(new PTRRecord(typeName, DClass.IN, timeToLive, dnsName));
+			for (Name subtype : subtypes) {
+				update.add(new PTRRecord(subtype, DClass.IN, timeToLive, dnsName));
+			}
 			update.add(new SRVRecord(dnsName, DClass.IN, timeToLive, 0, 0, serviceData.getPort(), target));
 			update.add(new TXTRecord(dnsName, DClass.IN, timeToLive, strings));
 			Message response = resolver.send(update);
@@ -192,9 +199,16 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
 		try {
 			Name dnsName = serviceName.toDnsName();
 			Name typeName = new Name(serviceName.getType().toString(), registrationDomain);
+			List<Name> subtypes = new ArrayList<Name>(serviceName.getType().getSubtypes().size());
+			for (String subtype : serviceName.getType().toStringsWithSubtype()) {
+				subtypes.add(new Name(subtype, registrationDomain));
+			}
 			Update update = new Update(registrationDomain);		// XXX Should really be the zone (SOA) for the RRs we are about to remove
 			update.present(dnsName);
 			update.delete(new PTRRecord(typeName, DClass.IN, timeToLive, dnsName));
+			for (Name subtype : subtypes) {
+				update.delete(new PTRRecord(subtype, DClass.IN, timeToLive, dnsName));
+			}
 			update.delete(dnsName);
 			Message response = resolver.send(update);
 			switch (response.getRcode()) {
