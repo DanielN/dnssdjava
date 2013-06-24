@@ -163,12 +163,61 @@ public class ServiceType {
 		return subtypes;
 	}
 
+	/**
+	 * Returns a string representation of the ServiceType.
+	 * Examples: "_http._tcp", "_ftp._tcp,_anon".
+	 * @return a string of the format "{type}.{transport}[,{subtype}][,{subtype}][...]".
+	 */
 	@Override
 	public String toString() {
-		return type + "." + transport;
+		StringBuilder sb = new StringBuilder();
+		sb.append(type).append('.').append(transport);
+		for (String subtype : subtypes) {
+			sb.append(',').append(subtype);
+		}
+		return sb.toString();
 	}
 
-	public List<String> toStringsWithSubtype() {
+	/**
+	 * Returns a ServiceType object representing the type specified in the String.
+	 * The argument is expected to be in the format returned by {@link #toString()}.
+	 * @param s the string to be parsed.
+	 * @return a ServiceType representing the type specified by the argument.
+	 * @throws IllegalArgumentException if the string cannot be parsed as a ServiceType.
+	 */
+	public static ServiceType valueOf(String s) {
+		int i = s.indexOf(',');
+		String domain = (i < 0) ? s : s.substring(0, i);
+		String sublist = (i < 0) ? "" : s.substring(i+1);
+		i = domain.indexOf('.');
+		if (i < 0) {
+			throw new IllegalArgumentException("No '.' in service type: " + s);
+		}
+		String type = domain.substring(0, i);
+		String transport = domain.substring(i+1);
+		String[] subs = sublist.split(",");
+		ServiceType res = new ServiceType(type, transport);
+		if (subs.length > 0) {
+			res = res.withSubtypes(subs);
+		}
+		return res;
+	}
+
+	/**
+	 * Get the DNS-SD subdomain that represents this type (excluding any subtypes).
+	 * For internal use only.
+	 * @return A string of the form "{type}.{transport}".
+	 */
+	String toDnsString() {
+		return type + "." + transport;
+	}
+	
+	/**
+	 * Get the DNS-SD subdomains that represent this type, one for each subtype.
+	 * For internal use only.
+	 * @return A list of strings of the form "{subtype}._sub.{type}.{transport}".
+	 */
+	List<String> toDnsStringsWithSubtype() {
 		List<String> list = new ArrayList<String>(subtypes.size());
 		for (String subtype : subtypes) {
 			list.add(subtype + "._sub." + type + "." + transport);

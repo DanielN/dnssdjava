@@ -150,9 +150,9 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
 		try {
 			ServiceName serviceName = serviceData.getName();
 			Name dnsName = serviceName.toDnsName();
-			Name typeName = new Name(serviceName.getType().toString(), registrationDomain);
+			Name typeName = new Name(serviceName.getType().toDnsString(), registrationDomain);
 			List<Name> subtypes = new ArrayList<Name>(serviceName.getType().getSubtypes().size());
-			for (String subtype : serviceName.getType().toStringsWithSubtype()) {
+			for (String subtype : serviceName.getType().toDnsStringsWithSubtype()) {
 				subtypes.add(new Name(subtype, registrationDomain));
 			}
 			Name target = new Name(serviceData.getHost());
@@ -198,9 +198,9 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
 	public boolean unregisterService(ServiceName serviceName) throws DnsSDException {
 		try {
 			Name dnsName = serviceName.toDnsName();
-			Name typeName = new Name(serviceName.getType().toString(), registrationDomain);
+			Name typeName = new Name(serviceName.getType().toDnsString(), registrationDomain);
 			List<Name> subtypes = new ArrayList<Name>(serviceName.getType().getSubtypes().size());
-			for (String subtype : serviceName.getType().toStringsWithSubtype()) {
+			for (String subtype : serviceName.getType().toDnsStringsWithSubtype()) {
 				subtypes.add(new Name(subtype, registrationDomain));
 			}
 			Update update = new Update(registrationDomain);		// XXX Should really be the zone (SOA) for the RRs we are about to remove

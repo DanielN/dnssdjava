@@ -67,7 +67,12 @@ public class ServiceName {
 
 	@Override
 	public String toString() {
-		return name + '.' + type + '.' + domain;
+		StringBuilder sb = new StringBuilder();
+		sb.append(name).append('.').append(type.toDnsString()).append('.').append(domain);
+		for (String subtype : type.getSubtypes()) {
+			sb.append(',').append(subtype);
+		}
+		return sb.toString();
 	}
 
 	@Override

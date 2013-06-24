@@ -150,11 +150,11 @@ class UnicastDnsSDBrowser implements DnsSDBrowser {
 	private List<ServiceName> getServiceInstances(ServiceType type, Name domainName) {
 		if (type.getSubtypes().isEmpty()) {
 			List<ServiceName> results = new ArrayList<ServiceName>();
-			getServiceInstances(type.toString(), domainName, results);
+			getServiceInstances(type.toDnsString(), domainName, results);
 			return results;
 		} else {
 			Set<ServiceName> results = new HashSet<ServiceName>();
-			for (String subtype : type.toStringsWithSubtype()) {
+			for (String subtype : type.toDnsStringsWithSubtype()) {
 				getServiceInstances(subtype, domainName, results);
 			}
 			return new ArrayList<ServiceName>(results);

@@ -21,7 +21,7 @@ public class TestApp {
 		
 		try {
 			DnsSDRegistrator reg = DnsSDFactory.getInstance().createRegistrator(dom);
-			ServiceName name = reg.makeServiceName("MyTestService", new ServiceType("_http", Transport.TCP).withSubtype("_printer"));
+			ServiceName name = reg.makeServiceName("MyTestService", ServiceType.valueOf("_http._tcp,_printer"));
 			ServiceData data = new ServiceData(name, reg.getLocalHostName(), 8080);
 			if (reg.registerService(data)) {
 				System.out.println("Service registered: " + name);
