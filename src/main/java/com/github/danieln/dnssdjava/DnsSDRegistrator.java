@@ -48,7 +48,7 @@ public interface DnsSDRegistrator {
 	 * Set the TSIG key used to authenticate updates sent to the DNS server.
 	 * Passing null for all values to disable TSIG authentication.
 	 * @param name the name of the key.
-	 * @param signature algorithm, one of {@link #TSIG_ALGORITHM_HMAC_MD5},
+	 * @param algorithm the signature algorithm, one of {@link #TSIG_ALGORITHM_HMAC_MD5},
 	 *        {@link #TSIG_ALGORITHM_HMAC_SHA1}, {@link #TSIG_ALGORITHM_HMAC_SHA256} 
 	 * @param key the base64 encoded key.
 	 */
