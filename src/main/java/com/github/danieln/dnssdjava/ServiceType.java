@@ -188,16 +188,21 @@ public class ServiceType {
 	public static ServiceType valueOf(String s) {
 		int i = s.indexOf(',');
 		String domain = (i < 0) ? s : s.substring(0, i);
-		String sublist = (i < 0) ? "" : s.substring(i+1);
+		String sublist = (i < 0) ? null : s.substring(i+1);
 		i = domain.indexOf('.');
 		if (i < 0) {
 			throw new IllegalArgumentException("No '.' in service type: " + s);
 		}
 		String type = domain.substring(0, i);
 		String transport = domain.substring(i+1);
-		String[] subs = sublist.split(",");
 		ServiceType res = new ServiceType(type, transport);
-		if (subs.length > 0) {
+		if (sublist != null) {
+			String[] subs = sublist.split(",");
+			for (String sub : subs) {
+				if (sub.isEmpty()) {
+					throw new IllegalArgumentException("Zero length subtype is not allowed: " + s);
+				}
+			}
 			res = res.withSubtypes(subs);
 		}
 		return res;
