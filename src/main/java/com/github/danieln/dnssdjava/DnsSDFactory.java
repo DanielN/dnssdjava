@@ -7,6 +7,7 @@ package com.github.danieln.dnssdjava;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * Factory class for creating {@link DnsSDBrowser}, {@link DnsSDRegistrator} and
@@ -69,7 +70,16 @@ public abstract class DnsSDFactory {
 	 * @return a new {@link DnsSDDomainEnumerator}.
 	 */
 	public DnsSDDomainEnumerator createDomainEnumerator() {
-		return createDomainEnumerator(DomainUtil.getComputerDomains());
+		return createDomainEnumerator(getComputerDomains());
+	}
+
+	/**
+	 * Try to figure out the domain name(s) for the computer.
+	 * This includes reverse subnet addresses, as described in RFC 6763 chapter 11.
+	 * @return a list of potential domain names.
+	 */
+	public List<String> getComputerDomains() {
+		return DomainUtil.getComputerDomains();
 	}
 
 	/**

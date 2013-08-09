@@ -9,6 +9,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
@@ -54,12 +55,12 @@ public class BrowserApp extends JFrame {
 				app.setDefaultCloseOperation(EXIT_ON_CLOSE);
 				app.setLocationByPlatform(true);
 				app.setVisible(true);
-				app.computerDomainChanged();
+				app.populateComputerDomains();
 			}
 		});
 	}
 
-	private JTextField computerDomainField;
+	private JComboBox computerDomainCombo;
 	private JComboBox browsingDomainCombo;
 	private JList serviceTypeList;
 	private JTextField subtypeField;
@@ -77,8 +78,9 @@ public class BrowserApp extends JFrame {
 		
 		Listener listener = new Listener();
 		JLabel computerDomainLabel = new JLabel("Computer Domain:");
-		computerDomainField = new JTextField(20);
-		computerDomainField.addActionListener(listener);
+		computerDomainCombo = new JComboBox();
+		computerDomainCombo.setEditable(true);
+		computerDomainCombo.addActionListener(listener);
 		JLabel browsingDomainLabel = new JLabel("Browsing Domain:");
 		browsingDomainCombo = new JComboBox();
 		browsingDomainCombo.setEditable(true);
@@ -124,7 +126,7 @@ public class BrowserApp extends JFrame {
 		layout.setHorizontalGroup(layout.createSequentialGroup()
 				.addGroup(layout.createParallelGroup()
 						.addComponent(computerDomainLabel)
-						.addComponent(computerDomainField)
+						.addComponent(computerDomainCombo)
 						.addComponent(browsingDomainLabel)
 						.addComponent(browsingDomainCombo)
 						.addComponent(serviceTypeLabel)
@@ -153,7 +155,7 @@ public class BrowserApp extends JFrame {
 				.addGroup(layout.createSequentialGroup()
 						.addComponent(computerDomainLabel)
 						.addPreferredGap(ComponentPlacement.RELATED)
-						.addComponent(computerDomainField, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addComponent(computerDomainCombo, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 						.addPreferredGap(ComponentPlacement.UNRELATED)
 						.addComponent(browsingDomainLabel)
 						.addPreferredGap(ComponentPlacement.RELATED)
@@ -188,10 +190,32 @@ public class BrowserApp extends JFrame {
 		pack();
 	}
 
+	private void populateComputerDomains() {
+		new SwingWorker<Void, Void>() {
+		
+			private Collection<String> domains;
+
+			@Override
+			protected Void doInBackground() throws Exception {
+				domains = new ArrayList<String>();
+				domains.add("");
+				domains.addAll(DnsSDFactory.getInstance().getComputerDomains());
+				return null;
+			}
+			
+			@Override
+			protected void done() {
+				computerDomainCombo.setModel(new DefaultComboBoxModel(domains.toArray(new String[domains.size()])));
+				computerDomainCombo.setSelectedIndex(0);
+			}
+			
+		}.execute();
+	}
+
 	private void computerDomainChanged() {
 		new SwingWorker<Void, Void>() {
 		
-			private final String domain = computerDomainField.getText().trim();
+			private final String domain = (String) computerDomainCombo.getSelectedItem();
 			
 			private Collection<String> domains;
 			private String defDomain;
@@ -335,7 +359,7 @@ public class BrowserApp extends JFrame {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			if (e.getSource() == computerDomainField) {
+			if (e.getSource() == computerDomainCombo) {
 				computerDomainChanged();
 			} else if (e.getSource() == browsingDomainCombo) {
 				browsingDomainChanged();
