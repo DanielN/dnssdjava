@@ -5,8 +5,6 @@ import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.github.danieln.dnssdjava.ServiceType.Transport;
-
 /**
  * Test application for doing testing during development.
  * The code is not meant as an example of how to use the library.
@@ -19,9 +17,11 @@ public class TestApp {
 		Logger.getLogger("com.github.danieln.dnssdjava").setLevel(Level.ALL);
 		DnsSDDomainEnumerator dom = DnsSDFactory.getInstance().createDomainEnumerator();
 		
+		String nameString = null;
 		try {
 			DnsSDRegistrator reg = DnsSDFactory.getInstance().createRegistrator(dom);
-			ServiceName name = reg.makeServiceName("MyTestService", ServiceType.valueOf("_http._tcp,_printer"));
+			ServiceName name = reg.makeServiceName("My\\Test.Service", ServiceType.valueOf("_http._tcp,_printer"));
+			nameString = name.toString();
 			ServiceData data = new ServiceData(name, reg.getLocalHostName(), 8080);
 			if (reg.registerService(data)) {
 				System.out.println("Service registered: " + name);
@@ -48,7 +48,7 @@ public class TestApp {
 
 		try {
 			DnsSDRegistrator reg = DnsSDFactory.getInstance().createRegistrator(dom);
-			ServiceName name = reg.makeServiceName("MyTestService", new ServiceType("_http", Transport.TCP).withSubtype("_printer"));
+			ServiceName name = ServiceName.valueOf(nameString);
 			if (reg.unregisterService(name)) {
 				System.out.println("Service unregistered: " + name);
 			} else {

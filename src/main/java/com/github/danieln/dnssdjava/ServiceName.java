@@ -65,10 +65,47 @@ public class ServiceName {
 		return domain;
 	}
 
+	/**
+	 * Returns a ServiceName object representing the service specified in the String.
+	 * The argument is expected to be in the format returned by {@link #toString()}.
+	 * @param s the string to be parsed.
+	 * @return a ServiceName representing the service specified by the argument.
+	 * @throws IllegalArgumentException if the string cannot be parsed as a ServiceName.
+	 */
+	public static ServiceName valueOf(String s) {
+		int i = indexOfNonEscaped(s, '.');
+		if (i < 0) {
+			throw new IllegalArgumentException("No '.' in service name: " + s);
+		}
+		String name = unescape(s.substring(0, i));
+		int j = s.indexOf('.', i+1);
+		if (j < 0) {
+			throw new IllegalArgumentException("No '.' in service type: " + s);
+		}
+		j = s.indexOf('.', j+1);
+		if (j < 0) {
+			throw new IllegalArgumentException("No '.' after service type: " + s);
+		}
+		ServiceType type = ServiceType.valueOf(s.substring(i+1, j));
+		i = s.indexOf(',', j+1);
+		String domain = (i < 0) ? s.substring(j+1) : s.substring(j+1, i);
+		if (i >= 0) {
+			String sublist = s.substring(i+1);
+			String[] subs = sublist.split(",");
+			for (String sub : subs) {
+				if (sub.isEmpty()) {
+					throw new IllegalArgumentException("Zero length subtype is not allowed: " + s);
+				}
+			}
+			type = type.withSubtypes(subs);
+		}
+		return new ServiceName(name, type, domain);
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(name).append('.').append(type.toDnsString()).append('.').append(domain);
+		sb.append(escape(name)).append('.').append(type.toDnsString()).append('.').append(domain);
 		for (String subtype : type.getSubtypes()) {
 			sb.append(',').append(subtype);
 		}
@@ -167,6 +204,44 @@ public class ServiceName {
 		System.arraycopy(tmp, 0, bytes, 1, tmp.length);
 		// implicit: bytes[tmp.length + 1] = 0;
 		return bytes;
+	}
+
+	/**
+	 * Escape a service name according to RFC6763 chapter 4.3.
+	 * @param name the name to escape.
+	 * @return the name with '.' and '\' escaped.
+	 */
+	private static String escape(String name) {
+		return name.replaceAll("\\\\|\\.", "\\\\$0");		// Replace "\" with "\\" and "." with "\."
+	}
+
+	/**
+	 * Undo escaping of a service name.
+	 * @see #escape(String)
+	 * @param name the escaped name.
+	 * @return the name with escapes removed.
+	 */
+	private static String unescape(String name) {
+		return name.replaceAll("\\\\(.)", "$1");		// Replace "\x" with "x" for any x
+	}
+
+	/**
+	 * Find the first non-escaped occurrence of a character in a string.
+	 * @see String#indexOf(int)
+	 * @param string the string to look through.
+	 * @param ch the character to find.
+	 * @return the index of the first occurrence, or -1 if it can't be found. 
+	 */
+	private static int indexOfNonEscaped(String string, char ch) {
+		for (int i = 0; i < string.length(); i++) {
+			int c = string.charAt(i);
+			if (c == '\\') {
+				i++;
+			} else if (c == ch) {
+				return i;
+			}
+		}
+		return -1;
 	}
 
 }
