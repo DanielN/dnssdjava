@@ -16,6 +16,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.xbill.DNS.Address;
+import org.xbill.DNS.Cache;
 import org.xbill.DNS.DClass;
 import org.xbill.DNS.Lookup;
 import org.xbill.DNS.Message;
@@ -26,6 +27,7 @@ import org.xbill.DNS.Rcode;
 import org.xbill.DNS.Record;
 import org.xbill.DNS.Resolver;
 import org.xbill.DNS.SRVRecord;
+import org.xbill.DNS.Section;
 import org.xbill.DNS.SimpleResolver;
 import org.xbill.DNS.TSIG;
 import org.xbill.DNS.TXTRecord;
@@ -181,6 +183,7 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
 			Message response = resolver.send(update);
 			switch (response.getRcode()) {
 				case Rcode.NOERROR:
+					flushCache(update);
 					return true;
 				case Rcode.YXDOMAIN:	// Prerequisite failed, the service already exists.
 					return false;
@@ -213,6 +216,7 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
 			Message response = resolver.send(update);
 			switch (response.getRcode()) {
 				case Rcode.NOERROR:
+					flushCache(update);
 					break;
 				case Rcode.NXDOMAIN:	// Prerequisite failed, the service doesn't exist.
 					return false;
@@ -226,6 +230,7 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
 			response = resolver.send(update);
 			switch (response.getRcode()) {
 				case Rcode.NOERROR:
+					flushCache(update);
 					logger.log(Level.FINE, "Removed service type record {0}", typeName);
 					break;
 				case Rcode.YXDOMAIN:	// Prerequisite failed, service instances exists
@@ -240,6 +245,24 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
 			throw new IllegalArgumentException("Invalid service name: " + serviceName, ex);
 		} catch (IOException ex) {
 			throw new DnsSDException("Failed to send DNS update to server", ex);
+		}
+	}
+
+	/**
+	 * Flush all records related to the update from the default cache.
+	 * @param update the update to flush.
+	 */
+	private static void flushCache(Update update) {
+		Cache cache = Lookup.getDefaultCache(DClass.IN);
+		Record[] records = update.getSectionArray(Section.UPDATE);
+		for (Record rec : records) {
+			if (rec.getType() == Type.ANY) {
+				logger.log(Level.FINE, "Flush Name {0} : {1}", new Object[] { rec.getName(), rec });
+				cache.flushName(rec.getName());
+			} else {
+				logger.log(Level.FINE, "Flush Set {0} {1} : {2}", new Object[] { rec.getName(), Type.string(rec.getRRsetType()), rec });
+				cache.flushSet(rec.getName(), rec.getRRsetType());
+			}
 		}
 	}
 }
