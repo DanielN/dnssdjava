@@ -12,6 +12,7 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.logging.Level;
@@ -34,6 +35,10 @@ class DomainUtil {
 	 * @return a list of potential domain names.
 	 */
 	static List<String> getComputerDomains() {
+		String domain = System.getProperty("dnssd.domain");
+		if (domain != null) {
+			return Collections.singletonList(domain);
+		}
 		List<String> results = new ArrayList<String>();
 		try {
 			Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
@@ -74,6 +79,10 @@ class DomainUtil {
 	 * @return a list of potential host names.
 	 */
 	static List<String> getComputerHostNames() {
+		String hostname = System.getProperty("dnssd.hostname");
+		if (hostname != null) {
+			return Collections.singletonList(hostname);
+		}
 		List<String> results = new ArrayList<String>();
 		try {
 			Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
@@ -83,7 +92,7 @@ class DomainUtil {
 					for (InterfaceAddress ifaddr : i.getInterfaceAddresses()) {
 						InetAddress inetAddr = ifaddr.getAddress();
 						try {
-							String hostname = Address.getHostName(inetAddr);
+							hostname = Address.getHostName(inetAddr);
 							results.add(hostname);
 						} catch (UnknownHostException ex) {
 							logger.log(Level.FINE, "No hostname for address: {0}", inetAddr);
