@@ -256,13 +256,8 @@ class UnicastDnsSDRegistrator implements DnsSDRegistrator {
 		Cache cache = Lookup.getDefaultCache(DClass.IN);
 		Record[] records = update.getSectionArray(Section.UPDATE);
 		for (Record rec : records) {
-			if (rec.getType() == Type.ANY) {
-				logger.log(Level.FINE, "Flush Name {0} : {1}", new Object[] { rec.getName(), rec });
-				cache.flushName(rec.getName());
-			} else {
-				logger.log(Level.FINE, "Flush Set {0} {1} : {2}", new Object[] { rec.getName(), Type.string(rec.getRRsetType()), rec });
-				cache.flushSet(rec.getName(), rec.getRRsetType());
-			}
+			logger.log(Level.FINE, "Flush name {0} due to update: {1}", new Object[] { rec.getName(), rec });
+			cache.flushName(rec.getName());
 		}
 	}
 }
