@@ -128,9 +128,13 @@ class UnicastDnsSDBrowser implements DnsSDBrowser {
 					if (record instanceof PTRRecord) {
 						PTRRecord ptr = (PTRRecord) record;
 						Name name = ptr.getTarget();
-						String type = name.getLabelString(0);
-						String transport = name.getLabelString(1);
-						results.add(new ServiceType(type, transport));
+						try {
+							String type = name.getLabelString(0);
+							String transport = name.getLabelString(1);
+							results.add(new ServiceType(type, transport));
+						} catch (IllegalArgumentException e) {
+							logger.warning("Invalid service type " + name + ": " + e.getMessage());
+						}
 					}
 				}
 			}
@@ -177,7 +181,11 @@ class UnicastDnsSDBrowser implements DnsSDBrowser {
 					if (record instanceof PTRRecord) {
 						PTRRecord ptr = (PTRRecord) record;
 						Name name = ptr.getTarget();
-						results.add(ServiceName.fromDnsName(name));
+						try {
+							results.add(ServiceName.fromDnsName(name));
+						} catch (IllegalArgumentException e) {
+							logger.warning("Invalid service instance " + name + ": " + e.getMessage());
+						}
 					}
 				}
 			}
